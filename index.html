@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+    <!-- Popper JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+
+    <!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script languaje="JavaScript" src="./js/funciones.js"></script>
+    <script languaje="JavasScript">
+        const numeric_pattern = /^\s*(?=.*[1-9])\d*(?:\.\d{1,8})?\s*$/
+        const integer_pattern = /^[1-9]\d{1,12}$/
+        datos = {
+            "pc":{
+                pattern:numeric_pattern,
+                value:null
+            },
+            "VH":{
+                pattern:numeric_pattern,
+                value:null
+            },
+            "i":{
+                pattern:integer_pattern,
+                value:null
+            },
+            "e":{
+                pattern:numeric_pattern,
+                value:null
+            },
+            "Ta":{
+                pattern:numeric_pattern,
+                value:null
+            },
+            "pa":{
+                pattern:numeric_pattern,
+                value:null
+            },
+            "n":{
+                pattern:integer_pattern,
+                value:null
+            },
+            "tao":{
+                pattern:integer_pattern,
+                value:null
+            }
+
+        }
+        function validate(element) {
+            var p = datos[element.id].pattern;
+            isValid= p.test(element.value);
+            $("#"+element.id).removeClass(isValid?"is-invalid":"is-valid");
+            $("#"+element.id).addClass(isValid?"is-valid":"is-invalid");
+            return isValid;
+        }
+        function docReady(){
+
+            datos.VH.value = parseFloat($("#VH")[0].value);
+            datos.i.value = parseInt($("#i")[0].value);
+            datos.tao.value = parseInt($("#tao")[0].value);
+            
+            $("#VH").on("input", e=>{
+                $("#VH_value").text(e.target.value);
+                datos[e.target.id].value = parseFloat(e.target.value);
+            });
+            $("#i").on("input", e=>{
+                $("#i_value").text(e.target.value);
+                datos[e.target.id].value = parseInt(e.target.value);
+            });
+            $("#DatosEntrada input, #DatosEntrada select").on("input", e=> {
+                if (validate(e.target)){
+                    datos[e.target.id].value = parseFloat(e.target.value);
+                } else {
+                    datos[e.target.id].value = null;
+                }
+                var res = realizar_calculos(datos);
+                if (res!=null) {
+                    for (tag in res) {
+                        $("td#"+tag ).html('<p class="text-right">' + res[tag] + "</p>");
+                        
+                    }
+                }
+            });
+            
+
+        }
+        $(document).ready(docReady)
+    </script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="row">
+            <!-- Formulario para ingresar valores de entrada-->
+            <div class="col-6">
+                <form id="DatosEntrada" action="#" class="needs-validation">
+                    <legend class="text-center header">Datos de Entrada</legend>
+                    <div class="form-group">
+                        <label for="pc">Compresión (psi):</label>
+                        <input type="text" id="pc" class="form-control" placeholder="Compresión" required />  
+                    </div>
+                    <div class="form-group">
+                        <label for="VH">Cilindrada:</label>
+                        <span id="VH_value">2</span>
+                        <input type="range" id="VH" min="0.3" max="8" step="0.1" value="2" class="custom-range">
+                    </div>
+                    <div class="form-group">
+                        <label for="i">N&uacute;mero de Cilindros:</label>
+                        <span id="i_value">4</span>
+                        <input type="range" id="i" min="2" max="16" step="2" value="4" class="custom-range">
+                    </div>
+                    <div class="form-group">
+                        <label for="e">Relaci&oacute;n de Compresi&oacute;n</label>
+                        <input type="text" class="form-control" id="e" placeholder="Relación de Compresión" required/>
+                    </div>
+                    <div class="form-group" >
+                        <label for="Ta">Temperatura de Admisi&oacute;n (&deg;C):</label>
+                        <input type="text" class="form-control" id="Ta" placeholder="Temperatura de Admisión" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="pa">Presi&oacute;n de Admisi&oacute;n (Kpa)</label>
+                        <input type="text" class="form-control" id="pa" placeholder="Presion de Admisión" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="n">Revoluciones @Potencia M&aacute;xima:</label>
+                        <input type="text" class="form-control" id="n" placeholder="Revoluciones @Potencia Máxima" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="tao">N&uacute;mero de Ciclos del Motor:</label>
+                        <select class="form-control" id="tao">
+                            <option value="1">1</option>
+                            <option value="2" selected>2</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="col-6">
+                <legend class="text-center header">Resultados</legend>
+                <table id="resutls" class="table-borderless">
+                    <tr>
+                        <th>Temperatura de Compresi&oacute;n (&deg;K):</th>
+                        <td id="tc"></td>
+                    </tr>
+                    <tr>
+                        <th>Densidad del Aire (Kg/m&sup3;):</th>
+                        <td id="da"></td>
+                    </tr>
+                    <tr>
+                        <th>Masa de Aire Te&oacute;rica (Kg):</th>
+                        <td id="mat"></td>
+                    </tr>
+                    <tr>
+                        <th>Masa de Aire Real (Kg/s):</th>
+                        <td id="mar"></td>
+                    </tr>
+                    <tr>
+                        <th>Masa de Combustible (Kg/s):</th>
+                        <td id="mf"></td>
+                    </tr>
+                    <tr>
+                        <th>Calor Espec&iacute;fico (KJ/Kg*&deg;K):</th>
+                        <td id="qf"></td>
+                    </tr>
+                    <tr>
+                        <th>Temperatura de Combusti&oacute;n (&deg;K):</th>
+                        <td id="tz"></td>
+                    </tr>
+                    <tr>
+                        <th>Presi&oacute;n de Combusti&oacute;n (Kpa):</th>
+                        <td id="pz"></td>
+                    </tr>
+                    <tr>
+                        <th>Temperatura en Escape (&deg;K):</th>
+                        <td id="tb"></td>
+                    </tr>
+                    <tr>
+                        <th>Presi&oacute;n Escape (Kpa):</th>
+                        <td id="pb"></td>
+                    </tr>
+                    <tr>
+                        <th>Diferencial de Presi&oacute;n Indicado:</th>
+                        <td id="lambda_i"></td>
+                    </tr>
+                    <tr>
+                        <th>Diferencial de Presi&oacute;n Efectivo:</th>
+                        <td id="lambda_e"></td>
+                    </tr>
+                    <tr>
+                        <th>Presi&oacute;n Media Indicada (Kpa):</th>
+                        <td id="pmi"></td>
+                    </tr>
+                    <tr>
+                        <th>Potencia Indicada (CV):</th>
+                        <td id="pi"></td>
+                    </tr>
+                    <tr>
+                        <th>Rendimiento T&eacute;rmico:</th>
+                        <td id="nt"></td>
+                    </tr>
+                    <tr>
+                        <th>Presi&oacute;n Media Efectiva (Kpa):</th>
+                        <td id="pme"></td>
+                    </tr>
+                    <tr>
+                        <th>Potencia Efectiva (CV):</th>
+                        <td id="pe"></td>
+                    </tr>
+                    <tr>
+                        <th>Potencia Absorvida (CV):</th>
+                        <td id="pab"></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+</body>
+
+</html>
