@@ -216,6 +216,7 @@ function realizar_calculos(datos) {
             vars[idx] = datos[idx].value;
         }
     }
+	vars["pc"]=vars["pc"]*6.895;
     vars["tc"] = temperatura_compresión(vars.e, vars.Ta);
     vars["da"] = densidad_aire(vars.pa, vars.Ta);
     vars["mat"] = masa_aire_t(vars.da, vars.VH, vars.i);
